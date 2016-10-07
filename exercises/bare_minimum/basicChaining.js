@@ -11,11 +11,26 @@
 var fs = require('fs');
 var Promise = require('bluebird');
 
+var pluckFirstLineFromFileAsync = require('./promiseConstructor').pluckFirstLineFromFileAsync;
+var getGitHubProfileAsync = require('./promisification').getGitHubProfileAsync;
+var writeFileAsync = Promise.promisify(fs.writeFile);
 
-
+// promises return an object that have a "then" property
+// "then" property takes in a callback that receives the result of your promise
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
   // TODO
-};
+  return pluckFirstLineFromFileAsync(readFilePath) 
+    // .then(function (username) {   //why does this not work?!!?!?
+    //   getGitHubProfileAsync(username);
+    // })
+    .then(getGitHubProfileAsync)
+    .then(function(jsonResponse) {
+      return writeFileAsync(writeFilePath, JSON.stringify(jsonResponse));
+    })
+    .catch(function (err) {
+      console.log(err);
+    }); 
+}; 
 
 // Export these functions so we can test them
 module.exports = {
